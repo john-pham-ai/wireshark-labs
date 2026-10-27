@@ -1,0 +1,81 @@
+What is a Wireshark "capture"?	A recording of every packet your network interface saw, saved so you can inspect them one by one	lab-00-setup concept
+What file format does Wireshark save captures in?	.pcapng — the standard capture format you can reopen and share	lab-00-setup concept
+What does promiscuous mode do?	Makes your network card copy ALL traffic passing by, not just packets addressed to you	lab-00-setup concept
+Keyboard shortcut to start/stop a capture?	Ctrl+E (Cmd+E on Mac)	lab-00-setup shortcut
+How do you spot the right interface to capture on the Wireshark start screen?	The one with an activity graph (a moving waveform) next to it — that's your active connection	lab-00-setup concept
+What is Npcap (the Windows installer option)?	The driver that lets Wireshark listen to your network card on Windows	lab-00-setup concept
+On a typical home Wi-Fi, whose traffic does your Wireshark capture see?	Mostly your own device's traffic — other devices' packets generally don't pass by your radio	lab-00-setup concept
+What is a "packet"?	A small chunk of data sent over the network — one row in Wireshark's packet list	lab-00-setup concept
+Name the three panes of the Wireshark window	Packet List (top), Packet Details (middle), Packet Bytes (bottom)	lab-01-first-capture concept
+True or false: the three panes always describe the same packet	True — selecting a row updates all three panes	lab-01-first-capture concept
+What's the difference between a "frame" and a "packet" in Wireshark?	For beginners: same row, synonyms. Precisely: "frame" is the whole unit as it went on the wire; "packet" is loose everyday speech	lab-01-first-capture concept
+List the nested layers of a web packet, outside-in	Frame → Ethernet → IP → TCP → HTTP	lab-01-first-capture protocol
+What does the Ethernet layer of a packet tell you?	Hardware (MAC) addressing between devices on your local network	lab-01-first-capture protocol
+What happens in the Packet Bytes pane when you highlight a layer in Packet Details?	The corresponding bytes light up in the hex view	lab-01-first-capture concept
+What does a black packet with red text in the packet list mean?	Wireshark detected a problem (e.g., a checksum error) — take it seriously	lab-01-first-capture concept
+What is a TCP "pure ACK" packet (and its default color)?	A tiny acknowledgment packet ("yep, got it") — purple	lab-01-first-capture protocol
+What do the Time column's display modes change?	What the numbers mean: seconds since capture start, time of day, or seconds since the previous packet	lab-01-first-capture concept
+What does a display filter do?	Hides packets you don't want to see — nothing is deleted and it's fully reversible	lab-02-filters filter
+What do green and red mean in the display filter bar?	Green = valid syntax applied; red = malformed filter, did nothing	lab-02-filters filter
+Display filter: show only DNS packets	dns	lab-02-filters filter
+Display filter: traffic to OR from 192.168.1.10	ip.addr == 192.168.1.10	lab-02-filters filter
+Display filter: only the opening SYN of a new connection	tcp.flags.syn == 1 && tcp.flags.ack == 0	lab-02-filters filter
+Filter operators for and / or / not?	&& / || / ! (plus parentheses for grouping)	lab-02-filters filter
+What does "Apply as Filter" (right-click a field) do?	Builds a display filter from the exact field you clicked — no typing needed	lab-02-filters shortcut
+Capture-filter (BPF) equivalents of: ip.addr == 1.2.3.4 and tcp.port == 443	host 1.2.3.4 and tcp port 443	lab-02-filters filter
+Key difference between display filters and capture filters?	Display filters what you SEE (reversible). A capture filter drops packets BEFORE they're recorded — gone forever	lab-02-filters filter
+Rule of thumb for using filters?	Capture everything, narrow with display filters — use capture filters only when recording everything is impractical	lab-02-filters concept
+Display filter: only failed web requests	http.response.code >= 400	lab-02-filters filter
+How do you save a filter for one-click reuse?	Right-click the filter bar → Manage Filter Favorites → add it (becomes a button)	lab-02-filters shortcut
+What does DNS do?	Translates names like example.com into IP addresses like 93.184.216.34 — the internet's phone book	lab-03-dns protocol
+Which transport and port does DNS normally use?	UDP port 53	lab-03-dns protocol
+What pairs a DNS query with its response?	The Transaction ID — matches like a ticket number	lab-03-dns protocol
+What is an A record?	The DNS answer mapping a name to an IPv4 address	lab-03-dns protocol
+What is a CNAME record?	An alias pointing one name to another name — answers can chain through aliases before reaching an address	lab-03-dns protocol
+What is TTL in a DNS answer?	Time to live — how many seconds the answer may be cached	lab-03-dns protocol
+Display filter: DNS lookups slower than 100 ms	dns.time > 0.1	lab-03-dns filter
+Symptom: DNS queries with no responses — what does the user experience?	"The site won't load" — a DNS failure, even though the network is fine	lab-03-dns concept
+Why might revisiting a website show NO DNS traffic in your capture?	The answer is still cached — your computer remembers it until the TTL expires	lab-03-dns concept
+The TCP three-way handshake, in order?	SYN → SYN-ACK → ACK	lab-04-tcp-handshake protocol
+What does a SYN packet mean?	"Let's start a connection — my starting sequence number is X"	lab-04-tcp-handshake protocol
+Why do both sides of a TCP connection send sequence numbers?	Each side keeps its own byte-counter, so lost or out-of-order data can be detected and re-sent in order	lab-04-tcp-handshake protocol
+How do port numbers identify programs?	The server listens on a well-known port (80 = HTTP); your side uses a random high port — together with IPs they identify the conversation	lab-04-tcp-handshake protocol
+What does right-click → Follow → TCP Stream do?	Reassembles both directions of a conversation into one readable transcript, with each side in its own color	lab-04-tcp-handshake shortcut
+What does a polite TCP connection close look like?	FIN, ACK packets — a mutual, four-packet hang-up	lab-04-tcp-handshake protocol
+What does a TCP RST flag mean?	Abort — hang up NOW, something is wrong	lab-04-tcp-handshake protocol
+When does the actual HTTP request happen relative to the handshake?	Only AFTER all three handshake packets — data rides packets flagged PSH, ACK	lab-04-tcp-handshake concept
+What does an HTTP GET request mean?	"Please send me this resource" — method + path + version, e.g., GET / HTTP/1.1	lab-05-http protocol
+What is the HTTP POST method used for?	Sending data TO the server (forms, logins, uploads)	lab-05-http protocol
+What does the Host header specify?	Which website on that server you want — one server can host many sites	lab-05-http protocol
+The four HTTP status-code families?	2xx success, 3xx redirect, 4xx client's fault, 5xx server's fault	lab-05-http protocol
+What does HTTP 404 mean?	Resource not found (4xx = your side's fault)	lab-05-http protocol
+What does the Content-Type header tell you?	What kind of data follows (text/html, image/png, application/json...)	lab-05-http protocol
+Display filter: all HTTP requests (not responses)	http.request	lab-05-http filter
+Why doesn't https://example.com traffic show under the "http" filter?	It's TLS-encrypted — Wireshark can't parse it as HTTP, so it shows as TLS instead	lab-05-http concept
+Why can't you read the contents of HTTPS in Wireshark?	TLS encrypts everything before it hits the network — the recorded bytes are scrambled	lab-06-tls protocol
+Which part of an HTTPS connection is still readable in a capture?	The TLS handshake: Client Hello, Server Hello, Certificate — all in cleartext	lab-06-tls protocol
+What is SNI?	Server Name Indication — the target site's name sent in plaintext in the Client Hello; it leaks which sites you visit	lab-06-tls protocol
+What's in the server's TLS certificate?	The server's name, the signing authority, and the expiry — your browser validates it automatically	lab-06-tls protocol
+What can a network observer STILL see with HTTPS?	Destination IP, site name (via SNI), the DNS lookup, and timing/size patterns	lab-06-tls concept
+What can an observer NOT see with HTTPS?	URLs, page contents, passwords, cookies, form data	lab-06-tls concept
+What does "Application Data" in the Info column mean?	Encrypted payload — opaque binary, nothing readable	lab-06-tls protocol
+How can Wireshark decrypt your own TLS traffic (advanced technique)?	Point it at your browser's session-key log via the SSLKEYLOGFILE environment variable — only works for traffic where you control an endpoint	lab-06-tls concept
+Is analyzing other people's network traffic without permission legal?	No — wiretapping laws apply even if the traffic is unencrypted	lab-06-tls concept
+What does Statistics → Protocol Hierarchy show?	What fraction of packets and bytes each protocol makes up — the fastest fingerprint of a capture	lab-07-statistics concept
+What is a "conversation" in Statistics → Conversations?	One pair of addresses talking; sort by Bytes to find the big players of the capture	lab-07-statistics concept
+Conversations vs. Endpoints — what's the difference?	Conversations group traffic by PAIR of addresses; Endpoints group by a single address	lab-07-statistics concept
+What does the IO Graph plot?	Packets or bytes per second across the capture's timeline — the traffic's heartbeat	lab-07-statistics concept
+Three "shapes of trouble" visible in an IO Graph?	Dead silence (disconnection), sawtooth bursts-and-stalls (retransmissions), one channel saturating (bandwidth hog)	lab-07-statistics concept
+What lives in Statistics → Capture File Properties?	Duration, packet/byte totals, and the capture comments field — always annotate saved captures	lab-07-statistics concept
+What can you do by right-clicking something in a statistics screen?	Apply as Filter — pivot straight from the statistic to the actual packets	lab-07-statistics shortcut
+The three usual suspects when "the network feels slow"?	Slow DNS, packet loss (retransmissions), refused/reset connections	lab-08-troubleshooting concept
+Display filter: find slow DNS lookups	dns.time > 0.1 — anything over 100 ms is a smoking gun	lab-08-troubleshooting filter
+What causes TCP retransmissions?	Packet loss on the path — the receiver's duplicate ACKs tell the sender to re-send the missing data	lab-08-troubleshooting protocol
+Display filter: find retransmissions	tcp.analysis.retransmission	lab-08-troubleshooting filter
+What are duplicate ACKs?	The receiver re-acknowledging data it already has — the "still missing that piece" signal that precedes a retransmission	lab-08-troubleshooting protocol
+What does an RST in reply to your SYN mean?	Connection refused — nothing is listening on that port, or a firewall rejected you	lab-08-troubleshooting concept
+Display filter: find connection resets	tcp.flags.reset == 1	lab-08-troubleshooting filter
+Where should Wireshark troubleshooting START?	View → Expert Information — Wireshark's own warning list, linking straight to the offending packets	lab-08-troubleshooting shortcut
+The three-step diagnostic workflow?	Orient with statistics → suspect with filters → prove with specific packets	lab-08-troubleshooting concept
+What does "passing" a capstone diagnosis require?	Naming the right suspect AND citing your evidence — the filter you used and the packet numbers	lab-09-capstone concept
+What is the actual professional skill the capstone drilled?	Turning "a capture happened" into "here are the three things this capture is about," backed by evidence	lab-09-capstone concept
